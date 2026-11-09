@@ -2,16 +2,35 @@
 html,body{margin:0;height:100%;background:#000;color:#eee;font:20px/1.35 Arial,sans-serif;overflow:hidden}
 .w{display:grid;grid-template-columns:2fr 1fr;height:100vh}
 iframe{width:100%;height:100%;border:0}
-aside{padding:28px 28px 20px;border-left:1px solid #222;display:flex;flex-direction:column;gap:14px}
+aside{padding:22px 26px 16px;border-left:1px solid #222;display:flex;flex-direction:column;gap:12px}
 h1{margin:0;font-size:30px} h1 small{display:block;font-size:16px;color:#9aa;font-weight:400;margin-top:4px}
+#ship{flex:1;min-height:0}
 .m{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.m div{border:1px solid #2a2a2a;border-radius:10px;padding:10px 12px}
-.m b{display:block;font-size:28px;color:#fff} .m span{font-size:14px;color:#9aa}
-svg{align-self:center} .n{font-size:13px;color:#778;margin-top:auto}
-li{margin:4px 0} ul{margin:0;padding-left:20px;font-size:17px}
-</style><div class=w><iframe allow="autoplay; encrypted-media" src="https://www.youtube.com/embed/8ySMdUIF3cY?autoplay=1&start=237&rel=0&modestbranding=1"></iframe>
+.m div{border:1px solid #2a2a2a;border-radius:10px;padding:8px 12px}
+.m b{display:block;font-size:26px;color:#fff} .m span{font-size:14px;color:#9aa}
+.n{font-size:13px;color:#778}
+</style><div class=w><iframe allow="autoplay; encrypted-media" src="https://www.youtube.com/embed/8ySMdUIF3cY?autoplay=1&start=420&rel=0&modestbranding=1"></iframe>
 <aside><h1>Starship<small>SpaceX · fully reusable two-stage rocket</small></h1>
-<svg width="120" height="300" viewBox="0 0 60 150"><rect x="20" y="70" width="20" height="74" fill="#cfd3d6"/><rect x="20" y="18" width="20" height="50" fill="#e7eaec"/><path d="M20 18 Q30 -6 40 18Z" fill="#e7eaec"/><rect x="20" y="66" width="20" height="4" fill="#555"/><path d="M20 140 L14 148 L20 146Z M40 140 L46 148 L40 146Z" fill="#999"/><text x="46" y="44" fill="#9aa" font-size="6">Ship</text><text x="44" y="108" fill="#9aa" font-size="6">Super Heavy</text></svg>
-<div class=m><div><b>≈120 m</b><span>stack height</span></div><div><b>33</b><span>Raptor engines, booster</span></div><div><b>6</b><span>Raptors on the Ship</span></div><div><b>100 t+</b><span>to orbit, reusable</span></div></div>
-<ul><li>Stainless-steel body, methane + liquid oxygen</li><li>Booster is caught by the tower's arms</li><li>Goal: orbit, refuelling in space, Moon and Mars</li></ul>
-<div class=n>Approximate public figures · panel by Cindy</div></aside></div>
+<div id=ship></div>
+<div class=m><div><b>≈120 m</b><span>stack height</span></div><div><b>33</b><span>Raptors, booster</span></div><div><b>6</b><span>Raptors, Ship</span></div><div><b>100 t+</b><span>to orbit, reusable</span></div></div>
+<div class=n>Approximate public figures · 3D sketch by Cindy, not to scale in detail</div></aside></div>
+<script type=module>
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+const el=document.getElementById('ship'),W=el.clientWidth,H=el.clientHeight;
+const r=new THREE.WebGLRenderer({antialias:true});r.setSize(W,H);r.setPixelRatio(Math.min(2,devicePixelRatio));el.appendChild(r.domElement);
+const s=new THREE.Scene(),c=new THREE.PerspectiveCamera(32,W/H,0.1,200);c.position.set(0,2,30);c.lookAt(0,0,0);
+s.add(new THREE.HemisphereLight(0xffffff,0x223,1.1));const d=new THREE.DirectionalLight(0xffffff,1.6);d.position.set(6,8,10);s.add(d);
+const steel=new THREE.MeshStandardMaterial({color:0xc9ced2,metalness:.85,roughness:.32}),dark=new THREE.MeshStandardMaterial({color:0x2b2f33,metalness:.6,roughness:.5});
+const g=new THREE.Group();const R=.9;
+const booster=new THREE.Mesh(new THREE.CylinderGeometry(R,R,7.1,48),steel);booster.position.y=-3.6;g.add(booster);
+const ring=new THREE.Mesh(new THREE.CylinderGeometry(R*1.02,R*1.02,.35,48),dark);ring.position.y=-.05;g.add(ring);
+const ship=new THREE.Mesh(new THREE.CylinderGeometry(R,R,3.8,48),steel);ship.position.y=1.8;g.add(ship);
+const nose=new THREE.Mesh(new THREE.SphereGeometry(R,48,24,0,Math.PI*2,0,Math.PI/2),steel);nose.scale.y=2.1;nose.position.y=3.7;g.add(nose);
+const tile=new THREE.Mesh(new THREE.CylinderGeometry(R*1.005,R*1.005,3.8,48,1,true,Math.PI*.5,Math.PI),dark);tile.position.y=1.8;g.add(tile);
+const flap=(y,sx,w,h)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,.06),dark);m.position.set(sx*(R+w/2-.05),y,0);g.add(m)};
+flap(3.4,1,.55,.9);flap(3.4,-1,.55,.9);flap(.5,1,.8,1.3);flap(.5,-1,.8,1.3);
+for(const a of [0,1,2,3]){const gf=new THREE.Mesh(new THREE.BoxGeometry(.5,.08,.5),dark);gf.position.set(Math.cos(a*Math.PI/2)*(R+.2),-.6,Math.sin(a*Math.PI/2)*(R+.2));g.add(gf)}
+const eng=new THREE.Mesh(new THREE.CylinderGeometry(R*.95,R*.7,.5,32),dark);eng.position.y=-7.4;g.add(eng);
+g.rotation.z=.08;s.add(g);
+(function loop(){g.rotation.y+=.006;r.render(s,c);requestAnimationFrame(loop)})();
+</script>
